@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 時代的高中課程設計指南 — 反饋與迭代機制</title>
+<style>
+  :root{
+    --ink:#1F3A5F; --teal:#0E7C7B; --teal-dk:#0A5B5A; --gold:#C9871A;
+    --rust:#B14A2E; --paper:#F6F8F8; --card:#FFFFFF; --line:#DCE4E6;
+    --txt:#2B3440; --muted:#66707D;
+    --font:"Microsoft JhengHei","微軟正黑體","PingFang TC","Noto Sans TC",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--font);background:var(--paper);color:var(--txt);line-height:1.75}
+  @media (prefers-reduced-motion: reduce){ *{animation:none!important;transition:none!important} }
+
+  /* ---------- 導覽 ---------- */
+  nav{position:sticky;top:0;z-index:50;background:rgba(31,58,95,.97);backdrop-filter:blur(6px);
+      display:flex;align-items:center;gap:4px;padding:10px 20px;overflow-x:auto}
+  nav .brand{color:#fff;font-weight:700;font-size:19px;margin-right:14px;white-space:nowrap;letter-spacing:1px}
+  nav a{color:#C7D6E8;text-decoration:none;font-size:17.5px;padding:6px 12px;border-radius:20px;white-space:nowrap;transition:.2s}
+  nav a:hover,nav a:focus-visible{background:rgba(255,255,255,.14);color:#fff;outline:none}
+  nav a:focus-visible{box-shadow:0 0 0 2px var(--gold)}
+
+  /* ---------- 頁首 ---------- */
+  header{background:linear-gradient(150deg,#16304F 0%,var(--ink) 55%,#0F5D5C 130%);color:#fff;
+         padding:72px 24px 88px;text-align:center;position:relative;overflow:hidden}
+  header::after{content:"";position:absolute;inset:0;
+    background:radial-gradient(circle at 85% 20%,rgba(201,135,26,.18),transparent 45%),
+               radial-gradient(circle at 10% 90%,rgba(14,124,123,.25),transparent 40%);pointer-events:none}
+  .eyebrow{display:inline-block;border:1px solid rgba(255,255,255,.4);border-radius:30px;padding:5px 18px;
+           font-size:17px;letter-spacing:4px;color:#F3C874;margin-bottom:22px}
+  header h1{font-size:clamp(26px,4.5vw,44px);letter-spacing:2px;margin-bottom:14px;position:relative}
+  header p.sub{font-size:clamp(15px,2vw,19px);color:#CDE4E3;letter-spacing:1px;position:relative}
+  header p.tag{margin-top:26px;font-size:18px;color:#9FB4CB;position:relative}
+
+  main{max-width:1060px;margin:0 auto;padding:0 20px 80px}
+  section{margin-top:72px}
+  .sec-head{display:flex;align-items:baseline;gap:14px;border-bottom:3px solid var(--teal);padding-bottom:10px;margin-bottom:26px}
+  .sec-head .no{font-size:19px;font-weight:700;color:var(--gold);letter-spacing:2px}
+  .sec-head h2{font-size:clamp(20px,3vw,27px);color:var(--ink);letter-spacing:1px}
+  .lead{font-size:19.5px;color:var(--muted);margin-bottom:26px;max-width:820px}
+
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.on{opacity:1;transform:none}
+
+  /* ---------- 卡片 ---------- */
+  .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 22px 20px;
+        box-shadow:0 1px 3px rgba(31,58,95,.06)}
+  .card h3{font-size:20.5px;color:var(--ink);margin-bottom:10px;display:flex;gap:8px;align-items:center}
+  .card h3 .dot{width:10px;height:10px;border-radius:3px;background:var(--teal);flex:none}
+  .card p{font-size:18px;color:var(--txt)}
+  .card.gold h3 .dot{background:var(--gold)} .card.rust h3 .dot{background:var(--rust)}
+
+  .callout{background:#FDF6E8;border-left:5px solid var(--gold);border-radius:0 12px 12px 0;
+           padding:16px 20px;margin:26px 0;font-size:18.5px}
+  .callout b{color:var(--ink)}
+  .callout.teal{background:#EBF4F4;border-left-color:var(--teal)}
+
+  /* ---------- PGERI 互動迴圈 ---------- */
+  .loop-wrap{display:grid;grid-template-columns:minmax(300px,430px) 1fr;gap:30px;align-items:center}
+  @media(max-width:820px){.loop-wrap{grid-template-columns:1fr}}
+  .loop-svg{width:100%;height:auto;display:block}
+  .stage{cursor:pointer;transition:transform .25s}
+  .stage:hover .ring, .stage:focus-visible .ring{stroke-width:5}
+  .stage:focus{outline:none}
+  .stage.active .bubble{filter:drop-shadow(0 4px 10px rgba(31,58,95,.35))}
+  .stage-panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 28px;
+               min-height:280px;box-shadow:0 2px 10px rgba(31,58,95,.07)}
+  .stage-panel .chip{display:inline-block;font-size:16.5px;font-weight:700;letter-spacing:2px;color:#fff;
+                     background:var(--teal);border-radius:20px;padding:4px 14px;margin-bottom:12px}
+  .stage-panel h3{font-size:24px;color:var(--ink);margin-bottom:12px}
+  .stage-panel p{font-size:18.5px;margin-bottom:12px}
+  .stage-panel .lbl{font-size:16.5px;font-weight:700;color:var(--rust);letter-spacing:1px;margin-bottom:2px}
+  .stage-panel .scaffold{background:#F2F7F7;border-radius:10px;padding:12px 16px;font-size:17.5px}
+  .loop-hint{text-align:center;font-size:17px;color:var(--muted);margin-top:8px}
+
+  /* ---------- 策略手風琴 ---------- */
+  .acc{border:1px solid var(--line);border-radius:12px;background:var(--card);margin-bottom:12px;overflow:hidden}
+  .acc button.head{width:100%;display:flex;align-items:center;gap:14px;padding:16px 20px;background:none;border:none;
+        cursor:pointer;font-family:var(--font);font-size:19.5px;font-weight:700;color:var(--ink);text-align:left}
+  .acc button.head .num{flex:none;width:34px;height:34px;border-radius:10px;background:var(--ink);color:#fff;
+        display:grid;place-items:center;font-size:18px}
+  .acc button.head .arrow{margin-left:auto;color:var(--teal);transition:transform .3s;font-size:17px}
+  .acc.open button.head .arrow{transform:rotate(180deg)}
+  .acc .body{max-height:0;overflow:hidden;transition:max-height .4s ease}
+  .acc.open .body{max-height:600px}
+  .acc .inner{padding:0 20px 20px 68px;font-size:18px}
+  @media(max-width:600px){.acc .inner{padding-left:20px}}
+  .acc .inner .row{margin-top:10px}
+  .acc .inner .k{font-weight:700;color:var(--rust)}
+  .acc .inner .k.gold{color:var(--gold)}
+
+  /* ---------- 六步驟時間軸 ---------- */
+  .timeline{position:relative;margin-left:14px}
+  .timeline::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:3px;background:linear-gradient(var(--teal),var(--gold))}
+  .tl-item{position:relative;padding:0 0 26px 34px}
+  .tl-item::before{content:"";position:absolute;left:-7px;top:5px;width:17px;height:17px;border-radius:50%;
+                   background:#fff;border:4px solid var(--teal)}
+  .tl-item:nth-child(n+4)::before{border-color:var(--gold)}
+  .tl-item h3{font-size:20px;color:var(--ink);margin-bottom:6px}
+  .tl-item p{font-size:18px;color:var(--txt);max-width:840px}
+
+  /* ---------- 分頁籤(實例) ---------- */
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+  .tabs button{font-family:var(--font);font-size:18px;font-weight:700;padding:10px 18px;border-radius:30px;
+       border:1.5px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;transition:.2s}
+  .tabs button:hover{border-color:var(--teal);color:var(--teal)}
+  .tabs button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .tabs button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .tab-pane{display:none}
+  .tab-pane.on{display:block;animation:fade .4s}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .pane-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 28px}
+  .pane-card h3{color:var(--rust);font-size:22px;margin-bottom:6px}
+  .pane-card .goal{font-size:17.5px;color:var(--muted);margin-bottom:18px}
+  table{width:100%;border-collapse:collapse;font-size:17.5px}
+  th{background:var(--ink);color:#fff;text-align:left;padding:10px 12px;font-weight:700}
+  td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:nth-child(even) td{background:#F6F9F9}
+  td.st{font-weight:700;color:var(--teal);white-space:nowrap}
+
+  /* ---------- Rubric ---------- */
+  .rub th:first-child{background:var(--teal-dk)}
+  .rub td:first-child{font-weight:700;color:var(--ink);background:#EEF4F4}
+
+  /* ---------- 陷阱翻卡 ---------- */
+  .traps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+  .trap{perspective:900px;min-height:190px;cursor:pointer}
+  .trap .face{position:absolute;inset:0;border-radius:14px;padding:20px;backface-visibility:hidden;
+      transition:transform .55s;display:flex;flex-direction:column;justify-content:center}
+  .trap{position:relative}
+  .trap .front{background:var(--ink);color:#fff}
+  .trap .front .tag{font-size:15.5px;letter-spacing:3px;color:#F3C874;margin-bottom:8px}
+  .trap .front h4{font-size:19.5px;line-height:1.5}
+  .trap .front .flipnote{margin-top:auto;font-size:16px;color:#9FB4CB}
+  .trap .back{background:#fff;border:1.5px solid var(--teal);transform:rotateY(180deg);font-size:17.5px}
+  .trap .back .tag{font-size:15.5px;letter-spacing:3px;color:var(--teal);font-weight:700;margin-bottom:8px}
+  .trap.flipped .front{transform:rotateY(180deg)}
+  .trap.flipped .back{transform:rotateY(360deg)}
+  .trap:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:14px}
+
+  /* ---------- 自我檢核 ---------- */
+  .check{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 28px}
+  .check label{display:flex;gap:12px;align-items:flex-start;padding:10px 8px;border-radius:10px;font-size:18.5px;cursor:pointer}
+  .check label:hover{background:#F2F7F7}
+  .check input{margin-top:5px;accent-color:var(--teal);width:17px;height:17px;flex:none}
+  .bar{height:12px;border-radius:8px;background:#E4EBEC;overflow:hidden;margin:14px 0 6px}
+  .bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--gold));transition:width .5s}
+  .bar-txt{font-size:17px;color:var(--muted)}
+
+  footer{background:var(--ink);color:#B9C9DC;text-align:center;padding:34px 20px;font-size:17.5px;margin-top:80px}
+  footer b{color:#fff}
+</style>
+</head>
+<body>
+
+<nav aria-label="頁面導覽">
+  <span class="brand">AI × 課程設計</span>
+  <a href="#think">設計思維</a>
+  <a href="#loop">五環循環</a>
+  <a href="#strategy">六大策略</a>
+  <a href="#steps">實施步驟</a>
+  <a href="#cases">教學實例</a>
+  <a href="#rubric">評量規準</a>
+  <a href="#traps">陷阱對策</a>
+  <a href="#check">自我檢核</a>
+</nav>
+
+<header>
+  <span class="eyebrow">高中教師課程設計指南</span>
+  <h1>讓學生「與 AI 對話」,而不是「向 AI 要答案」</h1>
+  <p class="sub">建立反饋與迭代機制,培養思考力、除錯力與創造力</p>
+  <p class="tag">設計思維 × 六大策略 × 六步驟流程 × 跨科實例 × 評量規準</p>
+</header>
+
+<main>
+
+<!-- 設計思維 -->
+<section id="think" class="reveal">
+  <div class="sec-head"><span class="no">01</span><h2>設計思維:重新定位 AI 的角色</h2></div>
+  <p class="lead">課程設計的第一個決定不是「用哪個工具」,而是「AI 扮演什麼角色」。角色設定直接決定學生思考的深度:答案機養出複製者,思考夥伴養出判斷者。</p>
+  <div class="grid3">
+    <div class="card"><h3><span class="dot"></span>後設認知</h3><p>使用 AI 前先寫下自己的預測,使用後比對差異——把內隱思考外顯化,訓練學生監控與調節自己的認知歷程(Flavell)。</p></div>
+    <div class="card gold"><h3><span class="dot"></span>回饋三問</h3><p>有效回饋回答三個問題:我要去哪裡?我現在在哪裡?下一步怎麼走?每輪 AI 互動都應對應這三問(Hattie & Timperley)。</p></div>
+    <div class="card rust"><h3><span class="dot"></span>原型精神</h3><p>設計思考把失敗重新定義為「尚未完成的迭代」。每一版作品都是原型,AI 的回應是測試結果,修改是創作的常態。</p></div>
+  </div>
+  <div class="callout"><b>三大設計原則:</b>①「先思後問」——使用 AI 前必留人類思考的存底,才有比較與衝突;②「迭代留痕」——保留每輪提示詞、回應與修改理由,評量看版本間的進步;③「AI 可錯」——刻意讓學生面對幻覺與偏誤,把找錯設計成任務本身。</div>
+</section>
+
+<!-- 五環循環 -->
+<section id="loop" class="reveal">
+  <div class="sec-head"><span class="no">02</span><h2>核心模式:PGERI 五環迭代循環</h2></div>
+  <p class="lead">可嵌入任何學科的操作模式。點擊圓環上的階段,查看學生任務與教師鷹架。每完成一圈即為一次迭代,建議每項任務至少走完二至三圈。</p>
+  <div class="loop-wrap">
+    <div>
+      <svg class="loop-svg" viewBox="0 0 420 420" role="group" aria-label="PGERI 五環迭代循環圖">
+        <defs>
+          <marker id="arw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#9AB1B1"/>
+          </marker>
+        </defs>
+        <circle cx="210" cy="210" r="128" fill="none" stroke="#CFDCDC" stroke-width="2.5" stroke-dasharray="6 7"/>
+        <!-- 弧線箭頭 -->
+        <path d="M 210 68 A 142 142 0 0 1 345 165" fill="none" stroke="#9AB1B1" stroke-width="2.5" marker-end="url(#arw)"/>
+        <path d="M 352 255 A 142 142 0 0 1 262 342" fill="none" stroke="#9AB1B1" stroke-width="2.5" marker-end="url(#arw)"/>
+        <path d="M 158 342 A 142 142 0 0 1 68 255" fill="none" stroke="#9AB1B1" stroke-width="2.5" marker-end="url(#arw)"/>
+        <path d="M 75 165 A 142 142 0 0 1 145 82" fill="none" stroke="#9AB1B1" stroke-width="2.5" marker-end="url(#arw)"/>
+        <text x="210" y="196" text-anchor="middle" font-size="15" fill="#66707D">每一圈</text>
+        <text x="210" y="220" text-anchor="middle" font-size="21" font-weight="700" fill="#1F3A5F">= 一次迭代</text>
+        <text x="210" y="246" text-anchor="middle" font-size="13" fill="#66707D">建議至少 2–3 圈</text>
+        <!-- 五個節點:由 JS 生成事件 -->
+        <g class="stage" data-i="0" tabindex="0" role="button" aria-label="P 預想">
+          <circle class="ring bubble" cx="210" cy="52" r="40" fill="#0E7C7B" stroke="#fff" stroke-width="3"/>
+          <text x="210" y="47" text-anchor="middle" font-size="20" font-weight="700" fill="#fff">P</text>
+          <text x="210" y="68" text-anchor="middle" font-size="13" fill="#DFF2F1">預想</text>
+        </g>
+        <g class="stage" data-i="1" tabindex="0" role="button" aria-label="G 生成">
+          <circle class="ring bubble" cx="362" cy="162" r="40" fill="#1F3A5F" stroke="#fff" stroke-width="3"/>
+          <text x="362" y="157" text-anchor="middle" font-size="20" font-weight="700" fill="#fff">G</text>
+          <text x="362" y="178" text-anchor="middle" font-size="13" fill="#CFE0F2">生成</text>
+        </g>
+        <g class="stage" data-i="2" tabindex="0" role="button" aria-label="E 評估">
+          <circle class="ring bubble" cx="305" cy="340" r="40" fill="#C9871A" stroke="#fff" stroke-width="3"/>
+          <text x="305" y="335" text-anchor="middle" font-size="20" font-weight="700" fill="#fff">E</text>
+          <text x="305" y="356" text-anchor="middle" font-size="13" fill="#FBEFD8">評估</text>
+        </g>
+        <g class="stage" data-i="3" tabindex="0" role="button" aria-label="R 修正">
+          <circle class="ring bubble" cx="115" cy="340" r="40" fill="#B14A2E" stroke="#fff" stroke-width="3"/>
+          <text x="115" y="335" text-anchor="middle" font-size="20" font-weight="700" fill="#fff">R</text>
+          <text x="115" y="356" text-anchor="middle" font-size="13" fill="#F6DED6">修正</text>
+        </g>
+        <g class="stage" data-i="4" tabindex="0" role="button" aria-label="I 迭代">
+          <circle class="ring bubble" cx="58" cy="162" r="40" fill="#3E5C8A" stroke="#fff" stroke-width="3"/>
+          <text x="58" y="157" text-anchor="middle" font-size="20" font-weight="700" fill="#fff">I</text>
+          <text x="58" y="178" text-anchor="middle" font-size="13" fill="#D7E2F1">迭代</text>
+        </g>
+      </svg>
+      <p class="loop-hint">▲ 點擊或按 Enter 切換階段</p>
+    </div>
+    <div class="stage-panel" id="stagePanel" aria-live="polite"></div>
+  </div>
+  <div class="callout teal"><b>設計要訣:</b>五環的關鍵不在 G(生成),而在 P(預想)與 E(評估)。P 讓學生帶著自己的想法進場,E 逼學生對 AI 的輸出負起判斷責任。刪去這兩環,循環就退化回「答案販賣機」。</div>
+</section>
+
+<!-- 六大策略 -->
+<section id="strategy" class="reveal">
+  <div class="sec-head"><span class="no">03</span><h2>六大教學策略:把反饋與迭代做進課堂</h2></div>
+  <p class="lead">每個策略都是一種可直接套用的任務結構,點擊展開細節。</p>
+  <div id="accWrap"></div>
+</section>
+
+<!-- 六步驟 -->
+<section id="steps" class="reveal">
+  <div class="sec-head"><span class="no">04</span><h2>課程設計六步驟(教師操作流程)</h2></div>
+  <div class="timeline">
+    <div class="tl-item"><h3>1. 定錨「AI 無法取代」的學習目標</h3><p>把目標寫成「即使 AI 能生成答案,學生仍必須展現」的形式。寫作課的目標不是「產出一篇文章」,而是「能判斷文字優劣並說明理由」。目標決定 AI 介入的邊界。</p></div>
+    <div class="tl-item"><h3>2. 設計 AI 角色卡與使用規範</h3><p>為任務指定 AI 的角色(教練、對手、實習生、初學者),明訂可以做與不可以做,例如:「AI 可以提問、給回饋、提供反例;不可以代寫結論。」</p></div>
+    <div class="tl-item"><h3>3. 搭建迭代鷹架</h3><p>準備三份工具:預想單(使用前)、評估檢核表(使用中)、迭代日誌(使用後),把 PGERI 循環具體化,避免「請批判性思考」流於口號。</p></div>
+    <div class="tl-item"><h3>4. 埋設認知衝突點</h3><p>刻意安排學生與 AI 意見不合的時刻:查證 AI 給的資料、比較兩個 AI 的矛盾回答、讓 AI 攻擊初稿。衝突是迭代的燃料,沒有衝突就沒有修正的動機。</p></div>
+    <div class="tl-item"><h3>5. 以歷程為評量主體</h3><p>建議配分:最終成品 40%、迭代歷程(版本差異、修改理由、查證紀錄)40%、反思 20%。歷程有分數,學生才會認真經營每一圈循環。</p></div>
+    <div class="tl-item"><h3>6. 公開迭代,建立文化</h3><p>定期舉辦迭代分享會:展示初版與終版對比、最關鍵的一次修改、AI 犯過的最大錯誤,讓全班看見「修改是專業,不是丟臉」。</p></div>
+  </div>
+</section>
+
+<!-- 實例 -->
+<section id="cases" class="reveal">
+  <div class="sec-head"><span class="no">05</span><h2>跨科教學實例</h2></div>
+  <div class="tabs" role="tablist">
+    <button class="on" data-t="0" role="tab" aria-selected="true">國文寫作|與 AI 三回合改稿</button>
+    <button data-t="1" role="tab" aria-selected="false">自然探究|AI 假設審查會</button>
+    <button data-t="2" role="tab" aria-selected="false">英文/公民|紅藍辯論工作坊</button>
+  </div>
+
+  <div class="tab-pane on">
+    <div class="pane-card">
+      <h3>國文寫作:「與 AI 三回合改稿」(4 節課)</h3>
+      <p class="goal">目標:能針對回饋做出取捨判斷並說明理由;透過對比 AI 文風,發展個人語言風格。</p>
+      <table>
+        <tr><th style="width:80px">節次</th><th>活動內容</th><th style="width:32%">反饋與迭代機制</th></tr>
+        <tr><td class="st">第 1 節</td><td>手寫〈那一刻,我改變了想法〉600 字初稿,完全不用 AI;完成預想單:「我這篇最強的是…最弱的是…」</td><td><b>P 預想</b>:建立人類存底,之後所有 AI 回饋都與此比對。</td></tr>
+        <tr><td class="st">第 2 節</td><td>將初稿貼給 AI,提示詞限定:「你是嚴格但具體的寫作教練,指出三個最需要改進之處與原因,不要代寫。」比對 AI 意見與自己預想的異同。</td><td><b>G+E</b>:AI 只給回饋不給答案;學生標註「同意/不同意/需驗證」。</td></tr>
+        <tr><td class="st">第 3 節</td><td>完成第二稿,填寫修改決策表:「AI 建議 → 我的決定 → 理由」。再要求 AI 生成同題範文,找出「AI 味」:空泛排比、安全牌結尾、缺乏細節。</td><td><b>R+找碴</b>:批判 AI 文風,反向定義「有個人聲音的文字」。</td></tr>
+        <tr><td class="st">第 4 節</td><td>完成第三稿定稿;小組朗讀「改動最大的一段」前後對比;繳交迭代日誌。</td><td><b>I+分享</b>:評量看版本差異與決策理由,不只看成品。</td></tr>
+      </table>
+      <div class="callout" style="margin-bottom:0"><b>實際效果:</b>學生最常見的轉變是第一次發現「AI 的建議也可以拒絕」。有學生在日誌寫道:「AI 要我把結尾改得更正面,但我覺得留白比較有力量,所以沒改。」——這句話就是作者主體性的證據。</div>
+    </div>
+  </div>
+
+  <div class="tab-pane">
+    <div class="pane-card">
+      <h3>自然科探究:「AI 假設審查會」(6 節課)</h3>
+      <p class="goal">情境:探究與實作,主題「校園微氣候」。目標:設計可檢驗的假設、辨識混淆變因、查證 AI 提供的科學資訊。</p>
+      <table>
+        <tr><th style="width:110px">階段</th><th>活動內容</th></tr>
+        <tr><td class="st">第 1–2 節<br>提出假設</td><td>小組觀察校園提出假設(如「操場比中庭熱是因為沒有樹蔭」),先自行設計實驗,再請 AI 扮演「期刊審查人」攻擊設計:樣本數?控制變因?測量誤差?小組逐條回應或修改。</td></tr>
+        <tr><td class="st">第 3 節<br>找碴任務</td><td>教師展示一份 AI 生成的「文獻回顧」,其中混有一筆捏造的參考文獻與一個過度推論。各組限時查證找碴,整理「如何辨識 AI 幻覺」的班級守則。</td></tr>
+        <tr><td class="st">第 4–5 節<br>實作迭代</td><td>依修正後的設計測量;數據異常時先自行提出解釋,再與 AI 討論其他可能原因,記錄「我的解釋 vs. AI 的解釋」與最終判斷依據。</td></tr>
+        <tr><td class="st">第 6 節<br>審查發表</td><td>發表必含一頁「假設演化史」:第一版假設 → AI 攻擊了什麼 → 我們如何修改 → 為什麼更好。師生依規準提問。</td></tr>
+      </table>
+      <div class="callout teal" style="margin-bottom:0"><b>設計亮點:</b>AI 扮演「審查人」而非「解題者」——它的價值不是給出正確答案,而是提高學生論證的門檻;捏造文獻的找碴任務,讓「查證」從道德勸說變成有輸贏的遊戲。</div>
+    </div>
+  </div>
+
+  <div class="tab-pane">
+    <div class="pane-card">
+      <h3>英文/公民跨科:「紅藍辯論工作坊」(3 節課)</h3>
+      <p class="goal">題目範例:「學校是否應該允許學生在課堂使用生成式 AI?」目標:建構論證、回應反駁、以英文精準表達立場。</p>
+      <table>
+        <tr><th style="width:110px">階段</th><th>活動內容</th></tr>
+        <tr><td class="st">第 1 節<br>藍隊建構</td><td>學生以英文寫出立場與三個論點(不用 AI),互相口頭演練一次。</td></tr>
+        <tr><td class="st">第 2 節<br>紅隊攻擊</td><td>指示 AI:「You are the strongest opponent. Attack my argument at three levels: easy, medium, brutal.」學生逐級防守,守不住的論點必須修改或放棄,並記錄每一級攻防。</td></tr>
+        <tr><td class="st">第 3 節<br>真人辯論</td><td>班內正反交鋒。賽後反思:「AI 的哪個攻擊在真人辯論中真的出現了?哪個人類的攻擊是 AI 沒想到的?」看見 AI 推演與真實互動的差距。</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 評量規準 -->
+<section id="rubric" class="reveal">
+  <div class="sec-head"><span class="no">06</span><h2>評量規準範例(迭代歷程 Rubric)</h2></div>
+  <div class="pane-card" style="overflow-x:auto">
+    <table class="rub">
+      <tr><th style="width:110px">向度</th><th>優秀(A)</th><th>良好(B)</th><th>待加強(C)</th></tr>
+      <tr><td>預想品質</td><td>使用 AI 前有完整草稿與明確假設,並標註不確定處。</td><td>有草稿但假設模糊,少有不確定標註。</td><td>幾乎直接向 AI 索取答案,無自己的存底。</td></tr>
+      <tr><td>評估深度</td><td>能指出 AI 輸出的具體錯誤或不足,且至少一項經過查證。</td><td>能分類正誤但理由籠統,查證不完整。</td><td>照單全收,未對 AI 輸出提出任何質疑。</td></tr>
+      <tr><td>修改決策</td><td>每處修改有明確理由,能舉出「拒絕 AI 建議」的例子。</td><td>有修改紀錄但理由簡略,多數採納 AI 意見。</td><td>直接以 AI 版本取代自己的版本。</td></tr>
+      <tr><td>迭代幅度</td><td>完成三圈以上循環,版本間有實質進步且可追溯。</td><td>完成兩圈,版本間有部分改進。</td><td>僅一次生成即定稿,無迭代痕跡。</td></tr>
+      <tr><td>創造轉化</td><td>最終成品展現超出 AI 版本的個人觀點、風格或原創連結。</td><td>成品正確完整,但與 AI 版本差異有限。</td><td>成品高度接近 AI 原始輸出。</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 陷阱 -->
+<section id="traps" class="reveal">
+  <div class="sec-head"><span class="no">07</span><h2>常見陷阱與對策</h2></div>
+  <p class="lead">點擊卡片翻面,查看對策。</p>
+  <div class="traps" id="trapWrap"></div>
+</section>
+
+<!-- 自我檢核 -->
+<section id="check" class="reveal">
+  <div class="sec-head"><span class="no">08</span><h2>課程設計自我檢核表</h2></div>
+  <div class="check">
+    <label><input type="checkbox">我的學習目標,是「即使 AI 能生成答案,學生仍必須展現」的能力。</label>
+    <label><input type="checkbox">任務中為 AI 指定了明確角色,並訂出可以做/不可以做的邊界。</label>
+    <label><input type="checkbox">學生在使用 AI 之前,必須先留下自己的草稿、假設或預測。</label>
+    <label><input type="checkbox">任務中至少有一個「學生必須質疑或查證 AI」的環節。</label>
+    <label><input type="checkbox">學生需要保留提示詞、AI 回應與修改理由(迭代留痕)。</label>
+    <label><input type="checkbox">任務要求至少完成兩圈以上的迭代循環。</label>
+    <label><input type="checkbox">評量配分中,歷程與反思合計不低於 50%。</label>
+    <label><input type="checkbox">課程安排了公開分享迭代歷程的時刻。</label>
+    <div class="bar"><div id="barFill"></div></div>
+    <p class="bar-txt" id="barTxt">已完成 0 / 8 項</p>
+  </div>
+  <div class="callout"><b>結語:</b>AI 不會自動讓學生變聰明,也不會自動讓學生變懶惰——決定方向的,是課程設計。當「預想、生成、評估、修正、迭代」被織進任務結構,AI 就從答案的捷徑,變成思考的健身房。</div>
+</section>
+
+</main>
+
+<footer><b>AI 時代的高中課程設計指南</b> — 反饋與迭代機制 · 供教學設計參考使用</footer>
+
+<script>
+/* ---------- PGERI 階段資料 ---------- */
+const stages=[
+ {chip:"STAGE P",color:"#0E7C7B",name:"預想 Predict",
+  what:"先寫下自己的答案、假設或草稿,並標註最沒把握之處。這份「人類存底」是之後所有比較與衝突的基準。",
+  why:"沒有存底的 AI 使用,只會產生沒有摩擦力的複製;有了存底,才有「咦,跟我想的不一樣」的認知衝突。",
+  tool:"預想單句型:「我認為…因為…;我最不確定的是…」"},
+ {chip:"STAGE G",color:"#1F3A5F",name:"生成 Generate",
+  what:"設計提示詞向 AI 提問,並完整記錄提示詞與 AI 的回應,作為迭代日誌的素材。",
+  why:"提示詞本身就是思考的展現——問得精確,代表想得清楚。",
+  tool:"提示詞四要素:角色(你是…)、任務(請你…)、脈絡(背景是…)、格式(請以…呈現)。"},
+ {chip:"STAGE E",color:"#C9871A",name:"評估 Evaluate",
+  what:"用檢核表比對 AI 輸出與自己的預想,把內容標成「正確/存疑/錯誤」三類,並至少查證一項事實。",
+  why:"這一環逼學生對 AI 的輸出負起判斷責任,是批判性思考真正發生的地方。",
+  tool:"評估三問:證據在哪?邏輯通嗎?漏了什麼?"},
+ {chip:"STAGE R",color:"#B14A2E",name:"修正 Refine",
+  what:"決定採納、改寫或反駁 AI 的意見,寫下每一處修改的決定與理由,產出新版本。",
+  why:"「拒絕 AI 建議並說明理由」是作者主體性的最佳證據,應在評量中特別加分。",
+  tool:"決策句型:「我保留/刪除/改寫了…因為…」"},
+ {chip:"STAGE I",color:"#3E5C8A",name:"迭代 Iterate",
+  what:"帶著新版本與新問題回到 P,展開下一圈循環,直到達成評量規準。",
+  why:"版本之間的差距,就是學習的證據;評量對象從成品轉移到進步。",
+  tool:"迭代日誌:每圈一頁,記錄版本差異、關鍵修改與下一步。"}
+];
+const panel=document.getElementById("stagePanel");
+function renderStage(i){
+  const s=stages[i];
+  panel.innerHTML=`<span class="chip" style="background:${s.color}">${s.chip}</span>
+    <h3>${s.name}</h3>
+    <p class="lbl">學生做什麼</p><p>${s.what}</p>
+    <p class="lbl">為什麼重要</p><p>${s.why}</p>
+    <div class="scaffold">🛠 教師鷹架 — ${s.tool}</div>`;
+  document.querySelectorAll(".stage").forEach((g,k)=>g.classList.toggle("active",k===i));
+}
+document.querySelectorAll(".stage").forEach(g=>{
+  const go=()=>renderStage(+g.dataset.i);
+  g.addEventListener("click",go);
+  g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}});
+});
+renderStage(0);
+
+/* ---------- 策略手風琴 ---------- */
+const strategies=[
+ ["AI 找碴(Error Hunting)","教師刻意提供或誘導 AI 產出含有錯誤的內容(事實錯誤、邏輯跳躍、偏頗觀點、捏造引用),學生的任務是「抓出錯誤並提出證據」。","查證能力、證據意識、對 AI 的健康懷疑。","讓 AI 生成「三個論點,其中一個有瑕疵」,分組競賽找碴;揭曉時討論「為什麼這個錯誤看起來很可信」。"],
+ ["三稿比較法(Three-Draft Protocol)","第一稿學生自己完成;第二稿依 AI 回饋修改;第三稿反過來評論 AI 的建議哪些該採納、哪些該拒絕,再定稿。","回饋素養、修改決策、作者主體性。","規定 AI 只能提問與建議、不能代寫:「請不要幫我改寫,只指出三個最需要改進之處並說明原因。」"],
+ ["學生教 AI(Feynman Reverse)","學生向 AI 解釋概念,要求 AI 扮演「愛問為什麼的初學者」不斷追問,直到學生答不出來——卡住的地方就是理解的破口。","概念釐清、表達精確度、發現知識盲點。","結束後列出「AI 問倒我的三個問題」,作為下次學習目標。"],
+ ["紅藍辯論(AI Red Team)","學生先寫出立場與論證,再指定 AI 扮演最強反方攻擊自己的論點,學生必須回應攻擊並強化論證,可多回合。","論證強度、換位思考、面對反駁的韌性。","要求 AI 依攻擊力道分級出招,從一級守到三級,守不住的論點必須改寫。"],
+ ["規準互評(Rubric as Lens)","師生共同制定評量規準,學生先用規準評 AI 的作品並給分,再用同一把尺回頭檢視自己的作品。","評鑑能力、規準內化、自我評估。","讓 AI 生成高、中、低三種品質版本,學生排序並說明理由,再對照教師的排序。"],
+ ["提示詞進化史(Prompt Evolution)","保留同一任務的所有提示詞版本,標註每次修改的動機與效果差異,期末回顧「問問題的能力」如何演化。","提問品質、精確表達、後設反思。","全班蒐集「最有效的一次提示詞改版」,建立班級提示詞智慧庫。"]
+];
+const accWrap=document.getElementById("accWrap");
+strategies.forEach((s,i)=>{
+  const d=document.createElement("div");d.className="acc"+(i===0?" open":"");
+  d.innerHTML=`<button class="head" aria-expanded="${i===0}"><span class="num">${i+1}</span>${s[0]}<span class="arrow">▼</span></button>
+    <div class="body"><div class="inner"><p>${s[1]}</p>
+    <p class="row"><span class="k">訓練目標:</span>${s[2]}</p>
+    <p class="row"><span class="k gold">小技巧:</span>${s[3]}</p></div></div>`;
+  d.querySelector(".head").addEventListener("click",()=>{
+    const open=d.classList.toggle("open");
+    d.querySelector(".head").setAttribute("aria-expanded",open);
+  });
+  accWrap.appendChild(d);
+});
+
+/* ---------- 實例分頁 ---------- */
+const tabBtns=document.querySelectorAll(".tabs button");
+const panes=document.querySelectorAll(".tab-pane");
+tabBtns.forEach(b=>b.addEventListener("click",()=>{
+  tabBtns.forEach(x=>{x.classList.remove("on");x.setAttribute("aria-selected","false");});
+  panes.forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");b.setAttribute("aria-selected","true");
+  panes[+b.dataset.t].classList.add("on");
+}));
+
+/* ---------- 陷阱翻卡 ---------- */
+const traps=[
+ ["鷹架流於表格填寫,學生應付了事","減少欄位、提高品質要求:與其填十格,不如寫一段有證據的評估;課堂公開朗讀優秀範例,建立品質基準。"],
+ ["學生偷用 AI 完成「不該用 AI」的階段","初稿在課堂手寫完成;更根本的做法是讓歷程佔分夠高——當抄 AI 反而拿不到歷程分,誘因自然下降。"],
+ ["找碴任務淪為「為反對而反對」","規定每個質疑必附證據或查證來源;同時要求指出「AI 做得好的一點」,訓練公允的評估而非全盤否定。"],
+ ["科技落差:部分學生不熟悉 AI 工具","採兩人一機配對(一人操作、一人記錄,輪替);第一堂課先全班共同示範演練,再放手分組。"],
+ ["教師負擔:歷程評量批改量大","以抽查+同儕互評分攤;迭代日誌只精批「修改決策」一欄;分享會口頭報告即時評分,取代部分書面批改。"]
+];
+const trapWrap=document.getElementById("trapWrap");
+traps.forEach(([q,a])=>{
+  const c=document.createElement("div");c.className="trap";c.tabIndex=0;c.setAttribute("role","button");
+  c.setAttribute("aria-label","陷阱:"+q+"。點擊查看對策");
+  c.innerHTML=`<div class="face front"><p class="tag">陷阱 TRAP</p><h4>${q}</h4><p class="flipnote">點擊查看對策 →</p></div>
+    <div class="face back"><p class="tag">對策 SOLUTION</p><p>${a}</p></div>`;
+  const flip=()=>c.classList.toggle("flipped");
+  c.addEventListener("click",flip);
+  c.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();flip();}});
+  trapWrap.appendChild(c);
+});
+
+/* ---------- 檢核進度 ---------- */
+const boxes=document.querySelectorAll(".check input");
+const fill=document.getElementById("barFill"),txt=document.getElementById("barTxt");
+boxes.forEach(b=>b.addEventListener("change",()=>{
+  const n=[...boxes].filter(x=>x.checked).length;
+  fill.style.width=(n/boxes.length*100)+"%";
+  txt.textContent=`已完成 ${n} / ${boxes.length} 項` + (n===boxes.length?" — 課程已具備完整的反饋與迭代機制!🎉":"");
+}));
+
+/* ---------- 捲動顯示 ---------- */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("on");io.unobserve(e.target);}}),{threshold:.08});
+document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

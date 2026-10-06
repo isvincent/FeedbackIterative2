@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高中 AI 反饋與迭代課程設計 - 首頁</title>
+    <style>
+        :root {
+            --c1: #FF595E;
+            --c2: #FFCA3A;
+            --c3: #8AC926;
+            --c4: #1982C4;
+            --c5: #6A4C93;
+            --c6: #FF9F1C;
+            --c7: #00B4D8;
+            --c8: #F15BB5;
+            --bg: #F8F9FA;
+            --text-color: #333333;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            background-attachment: fixed;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            padding: 50px 20px;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        p.subtitle {
+            font-size: 1.5rem;
+            margin-top: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 25px;
+            border-radius: 50px;
+            display: inline-block;
+            backdrop-filter: blur(5px);
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            width: 90%;
+            max-width: 1200px;
+            margin-bottom: 60px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            text-decoration: none;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02) rotateX(2deg);
+        }
+        
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .card-color-bar {
+            height: 25px;
+            width: 100%;
+        }
+
+        .card-content {
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex-grow: 1;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .card-content h2 {
+            font-size: 1.8rem;
+            margin: 0 0 15px 0;
+        }
+
+        .card-content p {
+            font-size: 1.2rem;
+            color: #666;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Color classes */
+        .color-1 { background-color: var(--c1); }
+        .color-2 { background-color: var(--c2); color: #333 !important;}
+        .color-3 { background-color: var(--c3); }
+        .color-4 { background-color: var(--c4); }
+        .color-5 { background-color: var(--c5); }
+        .color-6 { background-color: var(--c6); }
+        .color-7 { background-color: var(--c7); }
+        .color-8 { background-color: var(--c8); }
+        
+        .text-c2 { color: #333 !important; }
+
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            text-align: center;
+            color: #ffffff;
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        /* Float animation */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .floating {
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        /* Sparkle effect on click */
+        .sparkle {
+            position: absolute;
+            pointer-events: none;
+            background: white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: burst 0.6s ease-out forwards;
+            z-index: 10;
+        }
+
+        @keyframes burst {
+            0% { width: 0; height: 0; opacity: 0.8; }
+            100% { width: 150px; height: 150px; opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="floating">
+        <h1>高中 AI 反饋與迭代課程設計</h1>
+        <p class="subtitle">請點選下方卡片，探索各章節內容</p>
+    </header>
+
+    <div class="container" id="card-container">
+        <!-- Cards will be injected by JS -->
+    </div>
+
+    <footer>
+        <p>設計與開發 &copy; 2026 AI 課程團隊</p>
+    </footer>
+
+    <script>
+        const pages = [
+            { id: 1, title: '反饋與迭代課程設計', file: '高中AI反饋與迭代課程設計1.html', colorClass: 'color-1', icon: '🚀', desc: '基礎概念與設計核心' },
+            { id: 2, title: '互動網頁體驗', file: '高中AI反饋與迭代課程設計2.html', colorClass: 'color-2', icon: '✨', desc: '互動式學習與實踐' },
+            { id: 3, title: '高中教師互動版', file: '高中AI反饋與迭代課程設計3.html', colorClass: 'color-3', icon: '👩‍🏫', desc: '為教師量身打造的教案' },
+            { id: 4, title: '課程設計實作', file: '高中AI反饋與迭代課程設計4.html', colorClass: 'color-4', icon: '🛠️', desc: '動手設計你的第一堂課' },
+            { id: 5, title: '反饋與迭代機制', file: '高中AI反饋與迭代課程設計5.html', colorClass: 'color-5', icon: '🔄', desc: 'AI 時代的課程設計指南' },
+            { id: 6, title: '思考的鏡子', file: '高中AI反饋與迭代課程設計6.html', colorClass: 'color-6', icon: '🪞', desc: 'AI 素養課程設計指引' },
+            { id: 7, title: '進階統整資源', file: '高中AI反饋與迭代課程設計7.html', colorClass: 'color-7', icon: '📚', desc: '綜合應用與案例分析' },
+            { id: 8, title: '素養課程指南', file: '高中AI反饋與迭代課程設計8.html', colorClass: 'color-8', icon: '🎯', desc: '培養未來的 AI 素養' }
+        ];
+
+        const container = document.getElementById('card-container');
+
+        // Audio Context setup
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playTone(freq, type, duration, vol=0.1) {
+            if (!audioCtx) return;
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            
+            gainNode.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + duration);
+        }
+
+        // Generate Cards
+        pages.forEach((page, index) => {
+            const a = document.createElement('a');
+            a.href = page.file;
+            a.className = 'card';
+            
+            a.innerHTML = `
+                <div class="card-color-bar ${page.colorClass}"></div>
+                <div class="card-content">
+                    <div class="icon-circle ${page.colorClass} ${page.id === 2 ? 'text-c2' : ''}">${page.icon}</div>
+                    <h2>${page.title}</h2>
+                    <p>${page.desc}</p>
+                </div>
+            `;
+
+            // Hover sound
+            a.addEventListener('mouseenter', () => {
+                if (audioCtx) {
+                    const baseFreq = 300 + (index * 50);
+                    playTone(baseFreq, 'sine', 0.3, 0.05);
+                }
+            });
+
+            // Click effect
+            a.addEventListener('click', (e) => {
+                e.preventDefault();
+                initAudio();
+                
+                // Play success chime
+                playTone(600, 'triangle', 0.1, 0.1);
+                setTimeout(() => playTone(800, 'triangle', 0.2, 0.1), 100);
+                setTimeout(() => playTone(1200, 'sine', 0.4, 0.1), 200);
+
+                // Visual sparkle effect
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                
+                // Calculate click position relative to card
+                const rect = a.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                sparkle.style.left = x + 'px';
+                sparkle.style.top = y + 'px';
+                a.appendChild(sparkle);
+
+                // Delay navigation slightly to let effect show
+                setTimeout(() => {
+                    window.location.href = page.file;
+                }, 400);
+            });
+
+            container.appendChild(a);
+        });
+        
+        // Initial user interaction to unlock audio
+        document.body.addEventListener('click', initAudio, { once: true });
+        document.body.addEventListener('mousemove', initAudio, { once: true });
+    </script>
+</body>
+</html>

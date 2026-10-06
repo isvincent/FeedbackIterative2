@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 反饋與迭代課程設計｜高中教師互動版</title>
+<style>
+:root{--blue:#2563eb;--deep:#1e3a8a;--orange:#f97316;--green:#16a34a;--yellow:#facc15;--pink:#ec4899;--bg:#f8fafc;--card:#ffffff;--text:#172033;}
+*{box-sizing:border-box} body{margin:0;font-family:'Microsoft JhengHei','Noto Sans TC',system-ui,sans-serif;background:linear-gradient(135deg,#e0f2fe,#fef9c3 45%,#fae8ff);color:var(--text);font-size:22px;line-height:1.75}
+header{padding:56px 22px 36px;text-align:center;background:radial-gradient(circle at 20% 20%,rgba(255,255,255,.7),transparent 28%),linear-gradient(120deg,#2563eb,#7c3aed,#ec4899);color:white;position:relative;overflow:hidden}
+header h1{font-size:clamp(2rem,5vw,4rem);margin:.2em 0;font-weight:900;letter-spacing:.02em} header p{max-width:900px;margin:0 auto;font-size:1.15rem}
+.badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px} .badge{background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.5);border-radius:999px;padding:6px 14px;font-weight:700}
+nav{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.86);backdrop-filter:blur(12px);border-bottom:1px solid #e2e8f0;padding:10px;display:flex;gap:8px;overflow:auto;justify-content:center}
+nav a{white-space:nowrap;text-decoration:none;color:#1e3a8a;font-weight:800;background:#eff6ff;border-radius:999px;padding:8px 13px} nav a:hover{background:#dbeafe}
+main{max-width:1120px;margin:24px auto;padding:0 18px 80px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px} .card{background:rgba(255,255,255,.92);border-radius:24px;padding:24px;margin:18px 0;box-shadow:0 12px 30px rgba(15,23,42,.12);border:1px solid rgba(255,255,255,.75)}
+h2{font-size:1.55rem;color:#1e3a8a;margin-top:0;border-left:8px solid var(--orange);padding-left:12px} h3{color:#7c2d12} li{margin:.4em 0}
+.cycle{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:18px 0} .step{background:white;border-radius:18px;padding:14px;text-align:center;border:2px solid #dbeafe;box-shadow:0 8px 16px rgba(37,99,235,.12)} .step b{display:block;color:#1d4ed8;font-size:1.15rem} .arrow{font-size:1.5rem;color:#f97316}
+.prompt-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px} .prompt-card{border:0;text-align:left;background:linear-gradient(135deg,#fff,#eff6ff);padding:18px;border-radius:20px;box-shadow:0 8px 18px rgba(30,58,138,.12);cursor:pointer;font:inherit;display:flex;flex-direction:column;gap:8px} .prompt-card:hover{transform:translateY(-3px)} .prompt-card b{color:#1d4ed8} .prompt-card em{color:#16a34a;font-size:.9rem;font-weight:800}
+textarea,input{width:100%;font:inherit;border:2px solid #cbd5e1;border-radius:14px;padding:12px;background:#fff} textarea{min-height:92px} label{display:block;font-weight:800;color:#334155;margin:12px 0}
+button.action{background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;border:0;border-radius:999px;padding:10px 18px;font-weight:900;font-size:1rem;cursor:pointer;margin:6px 6px 6px 0} button.action.alt{background:linear-gradient(135deg,#16a34a,#22c55e)} button.action.warn{background:linear-gradient(135deg,#f97316,#facc15);color:#3b2100}
+.result{background:#f8fafc;border:2px dashed #94a3b8;border-radius:18px;padding:16px;margin-top:12px;white-space:pre-wrap}
+table{width:100%;border-collapse:collapse;background:white;border-radius:18px;overflow:hidden} th{background:#1d4ed8;color:white} td,th{padding:12px;border:1px solid #dbeafe;vertical-align:top} tr:nth-child(even){background:#f8fafc}
+.quiz .q{padding:16px;border-radius:18px;background:#fff7ed;margin:12px 0;border:1px solid #fed7aa} .quiz button{display:block;margin:8px 0;padding:9px 12px;border-radius:12px;border:1px solid #fdba74;background:white;cursor:pointer;text-align:left;width:100%;font:inherit} .quiz button.correct{background:#dcfce7;border-color:#22c55e} .quiz button.wrong{background:#fee2e2;border-color:#ef4444}
+.progress-box{position:fixed;right:14px;bottom:14px;background:#111827;color:white;border-radius:20px;padding:12px 16px;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:20} progress{width:150px;height:12px}
+.reveal{opacity:0;transform:translateY(16px);transition:.6s} .reveal.show{opacity:1;transform:translateY(0)}
+@media(max-width:760px){body{font-size:20px}.cycle{grid-template-columns:1fr 1fr} nav{justify-content:flex-start}}
+@media print{nav,.progress-box,button{display:none!important} body{background:white} .card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <h1>AI 反饋與迭代課程設計</h1>
+  <p>讓高中生在使用 AI 時，能先思考、會提問、懂判斷、能修正，並把 AI 回饋轉化為錯誤偵測與創造性學習。</p>
+  <div class="badges"><span class="badge">高中課程設計</span><span class="badge">反饋機制</span><span class="badge">版本迭代</span><span class="badge">創造性學習</span></div>
+</header>
+<nav><a href="#model">迭代模型</a><a href="#content">設計內容</a><a href="#prompts">提示詞</a><a href="#practice">練習區</a><a href="#quiz">測驗</a><a href="#record">學習歷程</a><a href="#rubric">評量</a></nav>
+<main>
+<section id="model" class="card reveal">
+<h2>AI 反饋迭代六階段</h2>
+<div class="cycle">
+ <div class="step"><b>1 初稿</b><span>先有自己的想法</span></div>
+ <div class="step"><b>2 提問</b><span>指定 AI 回饋任務</span></div>
+ <div class="step"><b>3 判斷</b><span>接受、修改或拒絕</span></div>
+ <div class="step"><b>4 修改</b><span>進行實質修正</span></div>
+ <div class="step"><b>5 比較</b><span>看見版本差異</span></div>
+ <div class="step"><b>6 反思</b><span>形成後設認知</span></div>
+</div>
+<p><strong>關鍵：</strong>AI 的回饋不是裁判，而是素材。學生要學會判斷建議是否合理，並能說明採用或不採用的理由。</p>
+</section>
+<section id="content">
+<section class="card reveal">
+  <h2>一、核心觀念：AI 不是答案機，而是思考回饋器</h2>
+  <ul><li>高中生使用 AI 時，真正需要培養的不是把題目丟給 AI 的技巧，而是能先形成自己的想法，再透過 AI 回饋看見差距、判斷建議、修正作品，最後產生更成熟、更有創造性的成果。</li><li>課程設計應從「完成作業」轉向「改善思考歷程」：學生要留下初稿、提示詞、AI 回饋、採納判斷、修正版與反思紀錄。</li><li>AI 的回饋不是裁判，而是素材。學生必須學會接受、修改或拒絕 AI 建議，並能說明理由。</li></ul>
+</section>
+<section class="card reveal">
+  <h2>二、AI 反饋迭代六階段</h2>
+  <ul><li>1. 先有自己的初稿：學生先寫出觀點、解題策略、概念圖、實驗設計或專題構想。</li><li>2. 向 AI 提出明確任務：要求 AI 指出問題、提出追問或提供替代觀點，而不是直接代寫。</li><li>3. 分析 AI 的回饋：將建議分成合理、部分合理、不合理三類。</li><li>4. 根據判斷修改作品：修正觀點、證據、邏輯、結構與表達，而非只做文字潤飾。</li><li>5. 再次提問並比較版本：請 AI 比較第一版與第二版，指出進步與仍待改善處。</li><li>6. 反思學習歷程：說明自己原本的問題、採用或拒絕哪些建議，以及下一次會如何更好地提問。</li></ul>
+</section>
+<section class="card reveal">
+  <h2>三、教師的課程設計思維</h2>
+  <ul><li>把 AI 設計成角色：批判性讀者、蘇格拉底式提問者、反方辯手、寫作教練、查核助理、創意夥伴、評分規準檢查員。</li><li>把提示詞設計成思考腳手架：學生不是問「幫我改好」，而是問「請從概念正確性、邏輯推論、證據充分性、表達清楚度指出問題」。</li><li>把評量重點放在歷程：初稿、AI 提問品質、回饋判斷、修改理由、版本差異與反思，都應納入評量。</li></ul>
+</section>
+<section class="card reveal">
+  <h2>四、讓學生找出錯誤的方法</h2>
+  <ul><li>錯誤偵測任務：教師提供有問題的文本、實驗設計或解題過程，學生請 AI 找錯後，還要判斷 AI 是否漏判或誤判。</li><li>三層錯誤分析：表層錯誤是字詞與格式；結構錯誤是段落與架構；深層錯誤是概念、邏輯、假設與證據。</li><li>回饋驗證表：學生必須指出 AI 建議是否成立，並從自己的原文中找出依據。</li></ul>
+</section>
+<section class="card reveal">
+  <h2>五、增加創造性的設計方法</h2>
+  <ul><li>先自己想，再請 AI 擴散：學生先提出 3 個想法，再請 AI 提供 10 個角度，最後進行比較、混合與改造。</li><li>限制條件創造法：加入時間、預算、對象、媒材、倫理或場域限制，迫使學生在限制中產生新方案。</li><li>跨領域類比：請 AI 用生態系統、遊戲設計、偵探辦案、產品設計等角度重新理解問題。</li><li>創造性可從四個面向培養：流暢性、變通性、獨創性與精緻性。</li></ul>
+</section>
+<section class="card reveal">
+  <h2>六、實例一：國文議論文寫作</h2>
+  <ul><li>主題：科技是否讓人更自由？學生先完成 500 字初稿，再請 AI 從中心論點、段落結構、例證使用、反方觀點與結論深度給回饋。</li><li>學生需判斷 AI 建議是否合理，例如 AI 指出缺乏反方觀點時，學生要回到原文檢查，並決定是否補入反方與回應。</li><li>迭代後的成果不只是文章更通順，而是能定義概念、處理反方、補強證據並深化論述。</li></ul>
+</section>
+<section class="card reveal">
+  <h2>七、實例二：自然科探究與實驗設計</h2>
+  <ul><li>主題：光照時間是否影響植物生長。學生先寫出研究問題、假設、操縱變因、控制變因、應變變因、實驗步驟與預期結果。</li><li>AI 扮演科學探究評審，檢查控制變因不足、測量方式不明確、樣本數不足或結論推論過度。</li><li>學生修正後，再請 AI 檢查是否仍有影響實驗公平性的因素，最後形成更嚴謹的實驗設計。</li></ul>
+</section>
+<section class="card reveal">
+  <h2>八、實例三：社會科公共議題探究</h2>
+  <ul><li>主題：社群媒體是否加劇社會分化？學生先提出立場，再請 AI 扮演反方辯手提出三個有力反駁。</li><li>學生將單向表態修正為條件式論述，例如：社群媒體不一定直接造成分化，但演算法推薦、同溫層互動與情緒化內容傳播可能放大既有分歧。</li><li>此活動能訓練學生避免過度簡化、納入反方觀點、指出條件限制。</li></ul>
+</section>
+<section class="card reveal">
+  <h2>九、實例四：校園創意專題</h2>
+  <ul><li>主題：如何改善學生午休品質？學生先自行提出方案，再請 AI 擴散成低成本可執行、需要行政協調、創新但較有挑戰三類。</li><li>學生不能直接照抄 AI 方案，而要把自己的想法與 AI 建議整合成更可行的提案。</li><li>最後從成本、執行難度、學生接受度與風險評估檢查可行性，將點子變成可執行方案。</li></ul>
+</section>
+<section class="card reveal">
+  <h2>十、課堂實施與評量建議</h2>
+  <ul><li>教師應規範 AI 可以協助找問題、追問、提供不同觀點與整理架構，但不能取代學生的立場、判斷、論證與最終反思。</li><li>評量建議：初始想法 15%、AI 提問品質 15%、回饋判斷能力 25%、修改與迭代品質 25%、創造性發展 10%、學習反思 10%。</li><li>教師要評量修改理由，而不是只看最後版本是否漂亮。學生能清楚說明為什麼接受、修改或拒絕 AI 建議，才是真正的學習。</li></ul>
+</section></section>
+<section id="prompts" class="card reveal"><h2>可直接使用的提示詞模板</h2><p>點擊卡片即可複製。建議學生把自己的初稿貼在提示詞後方，再向 AI 取得回饋。</p><div class="prompt-wrap"><button class="prompt-card" onclick="copyPrompt(this)" data-prompt="請你不要直接幫我改寫，而是從概念正確性、邏輯推論、證據充分性、表達清楚度四個面向，指出我的問題並給具體修改建議。"><b>找出問題</b><span>請你不要直接幫我改寫，而是從概念正確性、邏輯推論、證據充分性、表達清楚度四個面向，指出我的問題並給具體修改建議。</span><em>點擊複製</em></button><button class="prompt-card" onclick="copyPrompt(this)" data-prompt="請扮演蘇格拉底式提問者，針對我的想法連續提出 5 個追問，幫助我發現還沒有想清楚的地方。請不要直接給答案。"><b>蘇格拉底追問</b><span>請扮演蘇格拉底式提問者，針對我的想法連續提出 5 個追問，幫助我發現還沒有想清楚的地方。請不要直接給答案。</span><em>點擊複製</em></button><button class="prompt-card" onclick="copyPrompt(this)" data-prompt="請扮演反方辯手，針對我的觀點提出三個有力反駁，並指出我需要補強的證據或推論。"><b>反方辯手</b><span>請扮演反方辯手，針對我的觀點提出三個有力反駁，並指出我需要補強的證據或推論。</span><em>點擊複製</em></button><button class="prompt-card" onclick="copyPrompt(this)" data-prompt="請針對我的主題提出 10 種不同角度的想法，並依照常見想法、較新穎想法、具挑戰性想法分類。"><b>創意擴散</b><span>請針對我的主題提出 10 種不同角度的想法，並依照常見想法、較新穎想法、具挑戰性想法分類。</span><em>點擊複製</em></button><button class="prompt-card" onclick="copyPrompt(this)" data-prompt="以下是我的第一版與第二版。請比較兩者，指出具體進步之處、仍待改善之處，以及下一輪最值得修改的三個重點。"><b>版本比較</b><span>以下是我的第一版與第二版。請比較兩者，指出具體進步之處、仍待改善之處，以及下一輪最值得修改的三個重點。</span><em>點擊複製</em></button></div><div id="copyMsg" class="result" hidden></div></section>
+<section id="practice" class="card reveal"><h2>互動練習：我的 AI 反饋迭代單</h2><label>第一版想法<textarea id="draft1" placeholder="請先寫下自己的初稿、觀點或方案"></textarea></label><label>AI 給我的回饋<textarea id="feedback" placeholder="貼上 AI 給你的問題、追問或建議"></textarea></label><label>我的判斷<select id="judge" style="width:100%;font:inherit;border:2px solid #cbd5e1;border-radius:14px;padding:12px"><option>合理，採用</option><option>部分合理，修改後採用</option><option>不合理，不採用</option></select></label><label>我的修正版<textarea id="draft2" placeholder="根據判斷後的建議進行修正"></textarea></label><button class="action" onclick="savePractice()">儲存練習</button><button class="action alt" onclick="makeReflection()">產生反思提示</button><button class="action warn" onclick="clearPractice()">清除</button><div id="practiceResult" class="result">尚未產生反思。</div></section>
+<section id="quiz" class="card reveal quiz"><h2>學習成效測驗</h2><div class="q" data-answer="b"><strong>1. 使用 AI 前，最重要的第一步是什麼？</strong><button data-v="a">直接請 AI 完成全部內容</button><button data-v="b">先寫出自己的初稿或想法</button><button data-v="c">只要求 AI 潤飾文字</button></div><div class="q" data-answer="c"><strong>2. AI 建議一定要怎麼處理？</strong><button data-v="a">全部接受</button><button data-v="b">全部拒絕</button><button data-v="c">判斷是否合理，再決定採用、修改或拒絕</button></div><div class="q" data-answer="a"><strong>3. 哪一種提示詞最能促進思考？</strong><button data-v="a">請從概念、邏輯、證據與表達指出問題，不要直接改寫</button><button data-v="b">幫我寫一篇完整文章</button><button data-v="c">幫我把答案變長</button></div><div class="q" data-answer="b"><strong>4. 增加創造性的好方法是什麼？</strong><button data-v="a">只選 AI 給的第一個方案</button><button data-v="b">先自己想，再請 AI 擴散，最後混合改造</button><button data-v="c">不要設定任何限制</button></div><button class="action" onclick="scoreQuiz()">計算分數</button><div id="quizResult" class="result">尚未作答。</div></section>
+<section id="record" class="card reveal"><h2>學生 AI 使用歷程紀錄表</h2><label>我的原始想法<textarea data-record="我的原始想法" placeholder="請輸入你的紀錄..."></textarea></label><label>我給 AI 的提示詞<textarea data-record="我給 AI 的提示詞" placeholder="請輸入你的紀錄..."></textarea></label><label>AI 提供的主要回饋<textarea data-record="AI 提供的主要回饋" placeholder="請輸入你的紀錄..."></textarea></label><label>我採用的建議<textarea data-record="我採用的建議" placeholder="請輸入你的紀錄..."></textarea></label><label>我沒有採用的建議<textarea data-record="我沒有採用的建議" placeholder="請輸入你的紀錄..."></textarea></label><label>沒有採用的理由<textarea data-record="沒有採用的理由" placeholder="請輸入你的紀錄..."></textarea></label><label>我修改了什麼<textarea data-record="我修改了什麼" placeholder="請輸入你的紀錄..."></textarea></label><label>修改後變好的地方<textarea data-record="修改後變好的地方" placeholder="請輸入你的紀錄..."></textarea></label><label>我下一次會怎麼問 AI<textarea data-record="我下一次會怎麼問 AI" placeholder="請輸入你的紀錄..."></textarea></label><button class="action" onclick="saveRecords()">儲存紀錄</button><button class="action alt" onclick="exportRecords()">匯出文字</button><div id="recordResult" class="result">紀錄會儲存在本機瀏覽器。</div></section>
+<section id="rubric" class="card reveal"><h2>評量規準建議</h2><table><thead><tr><th>評量項目</th><th>比例</th><th>觀察重點</th></tr></thead><tbody><tr><td>初始想法品質</td><td><strong>15%</strong></td><td>是否先提出自己的觀點、解法或方案，而不是直接依賴 AI。</td></tr><tr><td>AI 提問品質</td><td><strong>15%</strong></td><td>提示詞是否明確要求 AI 回饋、追問、比較或檢查。</td></tr><tr><td>回饋判斷能力</td><td><strong>25%</strong></td><td>是否能判斷 AI 建議合理、部分合理或不合理，並說明理由。</td></tr><tr><td>修改與迭代品質</td><td><strong>25%</strong></td><td>是否根據回饋進行實質修正，而不只是文字美化。</td></tr><tr><td>創造性發展</td><td><strong>10%</strong></td><td>是否產生新角度、新組合、新限制下的可行方案。</td></tr><tr><td>學習反思</td><td><strong>10%</strong></td><td>是否能說明自己如何改變，以及下次如何更有效使用 AI。</td></tr></tbody></table></section>
+</main>
+<div class="progress-box">閱讀進度<br><progress id="prog" value="0" max="100"></progress> <span id="pct">0%</span></div>
+<script>
+function beep(freq=660){try{const c=new (window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator();const g=c.createGain();o.frequency.value=freq;o.connect(g);g.connect(c.destination);g.gain.value=.06;o.start();setTimeout(()=>{o.stop();c.close()},120)}catch(e){}}
+function copyPrompt(btn){const text=btn.dataset.prompt||'';if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text).catch(()=>fallbackCopy(text));}else{fallbackCopy(text);}const msg=document.getElementById('copyMsg');msg.hidden=false;msg.textContent='已複製：\n'+text;beep(760)}
+function fallbackCopy(text){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand('copy')}catch(e){}document.body.removeChild(ta)}
+function savePractice(){['draft1','feedback','judge','draft2'].forEach(id=>localStorage.setItem('ai_'+id,document.getElementById(id).value));document.getElementById('practiceResult').textContent='已儲存本次練習。';beep(600)}
+function loadPractice(){['draft1','feedback','judge','draft2'].forEach(id=>{const v=localStorage.getItem('ai_'+id);if(v)document.getElementById(id).value=v})}
+function makeReflection(){const d1=document.getElementById('draft1').value.trim(), fb=document.getElementById('feedback').value.trim(), j=document.getElementById('judge').value, d2=document.getElementById('draft2').value.trim();document.getElementById('practiceResult').textContent=`反思提示：
+1. 我的第一版主要想法是：${d1||'尚未填寫'}
+2. AI 回饋提醒我的重點是：${fb||'尚未填寫'}
+3. 我的判斷是：${j}
+4. 我修正後的版本是：${d2||'尚未填寫'}
+5. 下一輪我應該請 AI 針對「證據、邏輯、反方觀點、可行性」哪一項繼續追問？`;beep(720)}
+function clearPractice(){['draft1','feedback','draft2'].forEach(id=>document.getElementById(id).value='');document.getElementById('practiceResult').textContent='已清除畫面內容，但本機儲存仍可重新整理載入。';beep(360)}
+document.querySelectorAll('.quiz .q button').forEach(b=>b.addEventListener('click',()=>{const q=b.closest('.q');q.querySelectorAll('button').forEach(x=>x.classList.remove('correct','wrong'));b.classList.add(b.dataset.v===q.dataset.answer?'correct':'wrong');beep(b.dataset.v===q.dataset.answer?880:220)}));
+function scoreQuiz(){let total=0,ok=0;document.querySelectorAll('.quiz .q').forEach(q=>{total++;const chosen=q.querySelector('button.correct,button.wrong');if(chosen&&chosen.dataset.v===q.dataset.answer)ok++});document.getElementById('quizResult').textContent=`得分：${ok} / ${total}。${ok===total?'已掌握核心觀念！':'請回到上方內容複習「先思考、再提問、先判斷、再採用」。'}`;beep(700)}
+function saveRecords(){document.querySelectorAll('[data-record]').forEach(t=>localStorage.setItem('record_'+t.dataset.record,t.value));document.getElementById('recordResult').textContent='已儲存學習歷程紀錄。';beep(640)}
+function loadRecords(){document.querySelectorAll('[data-record]').forEach(t=>{const v=localStorage.getItem('record_'+t.dataset.record);if(v)t.value=v})}
+function exportRecords(){const text=[...document.querySelectorAll('[data-record]')].map(t=>`${t.dataset.record}：\n${t.value||'（未填寫）'}`).join('\n\n');document.getElementById('recordResult').textContent=text;beep(740)}
+window.addEventListener('scroll',()=>{const h=document.documentElement;const p=Math.round(h.scrollTop/(h.scrollHeight-h.clientHeight)*100);document.getElementById('prog').value=p;document.getElementById('pct').textContent=p+'%'});
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('show')}),{threshold:.12});document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+loadPractice();loadRecords();
+</script>
+</body>
+</html>
